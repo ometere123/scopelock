@@ -1,20 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { ChainConsole } from "@/components/chain-console";
 
 const nav = ["INDEX", "DISCLOSURES", "PROGRAMS", "PRECEDENT", "SETTLEMENTS"];
 
 export default function Home() {
-  const [connected, setConnected] = useState(false);
   return (
     <main>
       <header className="masthead">
         <Link className="wordmark" href="/">SCOPELOCK</Link>
         <nav aria-label="Primary navigation">{nav.map((item) => <a key={item} href={`#${item.toLowerCase()}`}>{item}</a>)}</nav>
-        <button className="connect" onClick={() => setConnected(!connected)}>
-          {connected ? "WALLET CONNECTED" : "CONNECT WALLET"}
-        </button>
+        <a className="connect" href="#chain">CONNECT WALLET</a>
       </header>
 
       <section className="hero" aria-labelledby="title">
@@ -26,6 +23,8 @@ export default function Home() {
           <Link href="/programs">Browse active scopes →</Link>
         </aside>
       </section>
+
+      <div id="chain"><ChainConsole /></div>
 
       <section id="programs" className="ledger-section">
         <div className="section-heading"><span>02 / PROGRAM INDEX</span><p>On-chain program data appears here. Connect to load the active network.</p></div>
