@@ -2,7 +2,7 @@
   "network": "studionet",
   "address": "0x6114bcC2eAeFbD4f83dB9EC35693cde067a60bfB",
   "deployment_tx": "0xaa374c3bbae62accae0bb69215c7ed7284c657e532a15e0ea183ee73c4d6e245",
-  "git_commit": "pending-final-commit",
+  "git_commit": "ce8a696 (release commit; amended metadata follows)",
   "contract_sha256": "a3ff06a24cb6b13e26029c8457da42a7cae51f4455430986287e42747cc02165",
   "deployed_at": "2026-08-13T00:00:00+00:00"
 }
