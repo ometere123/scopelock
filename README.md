@@ -18,12 +18,12 @@ Deterministic code alone enforces program date windows, exact bonds, sponsor per
 
 ## Product surface
 
-- `/` — concise index and network proof
-- `/programs`, `/programs/new`, `/programs/[id]` — live program ledger, creation, and dossier
-- `/programs/[id]/submit` — exact bond read from contract and shared injected-wallet write
-- `/disclosures`, `/disclosures/[id]` — public ledger and Scope Rail dossier
-- `/precedent` — settled-valid possible precedents (semantic distance is not duplicate)
-- `/settlements` — final on-chain payout/refund/slash ledger
+- `/`: concise index and network proof
+- `/programs`, `/programs/new`, `/programs/[id]`: live program ledger, creation, and dossier
+- `/programs/[id]/submit`: exact bond read from contract and shared injected-wallet write
+- `/disclosures`, `/disclosures/[id]`: public ledger and Scope Rail dossier
+- `/precedent`: settled-valid possible precedents (semantic distance is not duplicate)
+- `/settlements`: final on-chain payout/refund/slash ledger
 
 The persistent application shell owns the sole production wallet identity. Browser-generated/local-storage wallets are absent. Every payable action uses the connected injected wallet, waits for finalization, and fails clearly when `NEXT_PUBLIC_SCOPELOCK_CONTRACT` is missing.
 
