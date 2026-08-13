@@ -1,1 +1,5 @@
-export default function Precedent() { return <main className="precedent"><div><p className="eyebrow">PRECEDENT INDEX</p><h1>Possible precedent.</h1></div><p>Results are obtained from the contract’s deterministic, same-program vector search. They are never a duplicate verdict.</p></main>; }
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { reports, type Report } from "@/lib/scope-data";
+export default function Precedent(){const [items,setItems]=useState<Report[]>([]);const [error,setError]=useState("");useEffect(()=>{reports().then(r=>setItems(r.filter(x=>Number(x.status)===3))).catch(e=>setError(e instanceof Error?e.message:"RPC unavailable."))},[]);return <main className="precedent"><div><p className="eyebrow">PRECEDENT INDEX</p><h1>Possible precedent.</h1></div><p>Semantic distance is a retrieval measure, never a probability or duplicate verdict. Only consensus can mark a report DUPLICATE.</p>{error?<p>{error}</p>:<div className="rows">{items.length?items.map(r=><Link className="row" key={String(r.id)} href={`/disclosures/${r.id}`}><b>SL-{String(r.id)} / POSSIBLE PRECEDENT</b><span>{String(r.component)} · {String(r.severity)}<br/>{String(r.synopsis)}</span></Link>):<p>No settled VALID reports are available as precedent.</p>}</div>}</main>}

@@ -1,8 +1,8 @@
 {
   "network": "studionet",
-  "address": "0x00f0ba00fB0a6C12f9b6eFEc2CBEEDC78920BfCf",
-  "deployment_tx": "0x3fd73ccec23a7fff4b4da4842c693d5821393da72fdd4251668bbc6c0eaf0ada",
-  "git_commit": "e9c5ad71d875eaf71136cb4ab08c31dfdc3662a7",
-  "contract_sha256": "ffc84489c4e6f8b4b428443ea21bc51d8ae08c72de21fcad47f0967425ea4524",
-  "deployed_at": "2026-08-13T10:00:00+00:00"
+  "address": "0x6114bcC2eAeFbD4f83dB9EC35693cde067a60bfB",
+  "deployment_tx": "0xaa374c3bbae62accae0bb69215c7ed7284c657e532a15e0ea183ee73c4d6e245",
+  "git_commit": "pending-final-commit",
+  "contract_sha256": "a3ff06a24cb6b13e26029c8457da42a7cae51f4455430986287e42747cc02165",
+  "deployed_at": "2026-08-13T00:00:00+00:00"
 }

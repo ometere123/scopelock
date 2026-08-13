@@ -1,19 +1,8 @@
-"use client";
-
 import Link from "next/link";
-import { ChainConsole } from "@/components/chain-console";
-
-const nav = ["INDEX", "DISCLOSURES", "PROGRAMS", "PRECEDENT", "SETTLEMENTS"];
 
 export default function Home() {
   return (
     <main>
-      <header className="masthead">
-        <Link className="wordmark" href="/">SCOPELOCK</Link>
-        <nav aria-label="Primary navigation">{nav.map((item) => <a key={item} href={`#${item.toLowerCase()}`}>{item}</a>)}</nav>
-        <a className="connect" href="#chain">CONNECT WALLET</a>
-      </header>
-
       <section className="hero" aria-labelledby="title">
         <p className="eyebrow">PUBLIC SECURITY DISCLOSURE / GENLAYER CONSENSUS</p>
         <h1 id="title">Public findings.<br />Bound scope.<br /><em>Consensus settlement.</em></h1>
@@ -24,9 +13,7 @@ export default function Home() {
         </aside>
       </section>
 
-      <div id="chain"><ChainConsole /></div>
-
-      <section id="programs" className="ledger-section">
+      <section className="ledger-section">
         <div className="section-heading"><span>02 / PROGRAM INDEX</span><p>On-chain program data appears here. Connect to load the active network.</p></div>
         <div className="empty-ledger">
           <strong>NO PROGRAMS LOADED</strong>
@@ -35,7 +22,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="precedent" className="precedent">
+      <section className="precedent">
         <div><p className="eyebrow">03 / PRECEDENT DISCOVERY</p><h2>Similarity is a search signal.<br />It is not a verdict.</h2></div>
         <div className="comparison">
           <div><span>CURRENT DISCLOSURE</span><strong>Awaiting report</strong><p>Target, affected component, and researcher-supplied search synopsis are embedded deterministically.</p></div>
@@ -43,7 +30,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="disclosures" className="rail-section">
+      <section className="rail-section">
         <div><p className="eyebrow">04 / SCOPE RAIL</p><h2>A disclosure dossier is a record, not a dashboard.</h2></div>
         <ol className="rail">
           <li><time>01</time><b>SUBMISSION BOUND</b><small>Researcher bond and immutable program scope recorded on-chain.</small></li>
