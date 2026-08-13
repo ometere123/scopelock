@@ -1,0 +1,1 @@
+export default async function Program({ params }: { params: Promise<{ id: string }> }) { const { id } = await params; return <main className="ledger-section"><p className="eyebrow">PROGRAM / {id}</p><h1>Contract record required.</h1><p>Target, scope, GEN pool, payout matrix, and disclosures are loaded from ScopeLock, never a local product fixture.</p></main>; }

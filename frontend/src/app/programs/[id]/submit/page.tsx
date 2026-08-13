@@ -1,0 +1,1 @@
+export default async function Submit({ params }: { params: Promise<{ id: string }> }) { const { id } = await params; return <main className="ledger-section"><p className="eyebrow">SUBMIT REPORT / PROGRAM {id}</p><h1>Bind public evidence.</h1><p>Preview potential precedent before sending the exact program bond with the report transaction.</p></main>; }

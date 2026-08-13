@@ -1,0 +1,1 @@
+export default function NewProgram() { return <main className="ledger-section"><p className="eyebrow">01 / NEW PROGRAM</p><h1>Bind a scope.</h1><p>Program creation requires an attached GEN value and writes immutable target, scope, payout matrix, and bond policy to ScopeLock.</p></main>; }

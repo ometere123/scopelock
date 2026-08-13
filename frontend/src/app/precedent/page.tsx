@@ -1,0 +1,1 @@
+export default function Precedent() { return <main className="precedent"><div><p className="eyebrow">PRECEDENT INDEX</p><h1>Possible precedent.</h1></div><p>Results are obtained from the contract’s deterministic, same-program vector search. They are never a duplicate verdict.</p></main>; }

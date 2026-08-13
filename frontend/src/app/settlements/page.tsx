@@ -1,0 +1,1 @@
+export default function Settlements() { return <main className="ledger-section"><p className="eyebrow">SETTLEMENT LEDGER</p><h1>Final on-chain outcomes.</h1><p>No settlements are rendered until the configured ScopeLock contract returns them.</p></main>; }
