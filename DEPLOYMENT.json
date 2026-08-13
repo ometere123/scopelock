@@ -2,7 +2,7 @@
   "network": "studionet",
   "address": "",
   "deployment_tx": "",
-  "git_commit": "",
-  "contract_sha256": "",
+  "git_commit": "e8dd403534144cab8e7713f19488aaca6b75a03e",
+  "contract_sha256": "d40e64b2ee612f0798df5e391c7593b3016afe64efab4e5430bce162247fcb9f",
   "deployed_at": ""
 }
