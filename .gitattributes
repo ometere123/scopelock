@@ -1,0 +1,2 @@
+# The deployed GenVM source is byte-bound; never normalize it in Git.
+contracts/scopelock.py -text

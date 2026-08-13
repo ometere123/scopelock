@@ -1,29 +1,26 @@
 # ScopeLock submission readiness
 
-## Candidate remediation
+## Source and candidate proof
 
-The earlier repository was rejected because tracked pytest helpers were detected as GenVM candidates. The audit now permits exactly one tracked candidate, `contracts/scopelock.py`, and validates it. The Windows-only direct-test shim avoids contract-runtime imports so it cannot become an additional candidate.
+The earlier OriginalityBond submission was rejected because tracked pytest helpers were detected as GenVM candidates. ScopeLock’s audit now finds exactly one candidate, `contracts/scopelock.py`; it passes lint and semantic validation. The direct-test compatibility shim contains no contract runtime import.
 
-## Frozen deployment
+Final StudioNet deployment:
 
 ```text
-network: studionet
-address: 0x6114bcC2eAeFbD4f83dB9EC35693cde067a60bfB
-deployment tx: 0xaa374c3bbae62accae0bb69215c7ed7284c657e532a15e0ea183ee73c4d6e245
-contract sha256: a3ff06a24cb6b13e26029c8457da42a7cae51f4455430986287e42747cc02165
+address: 0xCCc5f1B4589FF468c300B417f46F782110487a9D
+deployment tx: 0xad49482466c2393bb6123cb2b7fef3b81443f75c79a0a40d6ab2529f8ca06c54
+source sha256: ecd525571e8e79fc309388bf5730fba2cbe3a5825c7f2568891f72340e13f067
 ```
 
-The deployed code was retrieved and contains the bounded `gl.nondet.web.render` evidence path, pinned-target resolution, and seven-day evidence-deadline path.
+Raw `gen_getContractCode` Base64 bytes, after decoding, and GenLayerJS `getContractCode()` both hash to the frozen local source hash. `scripts/verify-deployed-source.mjs` reproduces that check.
 
-## Release gates
+## Live evidence and settlement proof
 
-| Gate | Result |
-|---|---|
-| Candidate audit | PASS — one candidate |
-| GenVM lint / semantic validation | PASS |
-| Direct contract tests | PASS — 4 tests |
-| Frontend lint | PASS |
-| Typecheck | PASS |
-| Production build | PASS |
+| Step | Transaction | Result |
+|---|---|---|
+| Create/fund Program 1 (10 GEN) | `0xa7c31068b59fe2e36945841fe370477444431c1cc239512466eb324c6aa2c6a4` | Accepted, GenVM SUCCESS |
+| Submit Report 1 (1 GEN bond) | `0x621cf8463429f71088e0eebf8c7d22007a2f3f95cdd7d54f4f97e9a65b6080b9` | Accepted, GenVM SUCCESS |
+| Adjudicate GHSA-qw6h-vgh9-j6wx | `0xa305e878583d13e147111d4af8021734891ce0645811938e3573d291fc41babd` | FINALIZED, Accepted, GenVM SUCCESS, empty stderr |
+| Bond refund | `0x30dc5ed880bc5bd04c7d65620d428f665a19a5287aa6928476e869c58fea8855` | FINALIZED: 1 GEN to researcher |
 
-Honest remaining evidence: StudioNet deployment itself succeeded, but a separate real public-disclosure adjudication transaction has not yet been recorded. It must be performed before claiming an end-to-end live validator-fetch lifecycle proof.
+Validators fetched the GitHub advisory API and pinned `lib/response.js` at commit `04bc62787be974874bc1467b23606c36bc9779ba`. The stored result is `KNOWN_ISSUE / NONE`, payout `0`, refund `1 GEN`, slash `0`, remaining sponsor pool `10 GEN`.

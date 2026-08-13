@@ -36,9 +36,9 @@ Views: full bounded `get_program`, `get_report`, `preview_precedents`, counts, a
 ## Release proof
 
 - Network: StudioNet
-- Contract: `0x6114bcC2eAeFbD4f83dB9EC35693cde067a60bfB`
-- Deploy tx: `0xaa374c3bbae62accae0bb69215c7ed7284c657e532a15e0ea183ee73c4d6e245`
-- Source SHA-256: `a3ff06a24cb6b13e26029c8457da42a7cae51f4455430986287e42747cc02165`
+- Contract: `0xCCc5f1B4589FF468c300B417f46F782110487a9D`
+- Deploy tx: `0xad49482466c2393bb6123cb2b7fef3b81443f75c79a0a40d6ab2529f8ca06c54`
+- Source SHA-256: `ecd525571e8e79fc309388bf5730fba2cbe3a5825c7f2568891f72340e13f067`
 
 The deployed source was retrieved after deployment and matched the evidence-fetch/deadline implementation markers. `DEPLOYMENT.json` is the machine-readable binding; `scripts/verify-deployment-source.ps1` validates the local frozen hash.
 
@@ -53,4 +53,15 @@ cd frontend; npm run lint; npx tsc --noEmit; npm run build
 
 The candidate audit finds exactly one candidate: `contracts/scopelock.py`. The prior rejection came from tracked pytest helper imports being interpreted as contract candidates; the test compatibility shim now avoids runtime SDK imports, while the audit enforces the single-candidate invariant.
 
-Current direct suite: 4 passing lifecycle/read tests. This repository does not yet claim a live report-adjudication transaction with public web retrieval, so it does not claim that a validator-fetch lifecycle proof has been completed.
+## On-chain proof
+
+Program 1 locked 10 GEN against Express `<4.20.0` `response.redirect()` XSS at immutable commit `04bc62787be974874bc1467b23606c36bc9779ba`, component `lib/response.js`. The evidence preflight verified both the advisory API and raw source with HTTP 200.
+
+| Step | Method | Transaction | Execution / resulting state |
+|---|---|---|---|
+| Fund program | `create_program` | `0xa7c31068b59fe2e36945841fe370477444431c1cc239512466eb324c6aa2c6a4` | GenVM SUCCESS; Program 1 funded 10 GEN |
+| Bond disclosure | `submit_report` | `0x621cf8463429f71088e0eebf8c7d22007a2f3f95cdd7d54f4f97e9a65b6080b9` | GenVM SUCCESS; Report 1 bonded 1 GEN |
+| Validator adjudication | `adjudicate` | `0xa305e878583d13e147111d4af8021734891ce0645811938e3573d291fc41babd` | FINALIZED / Accepted / GenVM SUCCESS / empty stderr; `KNOWN_ISSUE`, `NONE` |
+| Settlement | finalized transfer | `0x30dc5ed880bc5bd04c7d65620d428f665a19a5287aa6928476e869c58fea8855` | 1 GEN refund to researcher |
+
+The stored evidence summary identifies GHSA-qw6h-vgh9-j6wx / CVE-2024-43796 and the pinned component; reasoning classifies it as a documented known issue. Payout is 0 GEN, refund 1 GEN, slash 0 GEN, and remaining sponsor pool is 10 GEN. The historical 404 attempt `0x9ca276b21f753cc8ff122db38b1fa354f16140488697e9166841273f87630be0` finalized a rollback with no money movement, proving the fail-closed evidence path.
