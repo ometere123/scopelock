@@ -26,4 +26,12 @@ cd frontend; npm run lint; npx tsc --noEmit; npm run build
 
 ## Deployment
 
-Deployment metadata is deliberately not fabricated. After deploying the frozen contract, record its StudioNet address, transaction hash, commit, and SHA-256 in `DEPLOYMENT.json`, then run `./scripts/verify-deployment-source.ps1`.
+StudioNet contract: `0x00f0ba00fB0a6C12f9b6eFEc2CBEEDC78920BfCf`
+
+Deployment transaction: `0x3fd73ccec23a7fff4b4da4842c693d5821393da72fdd4251668bbc6c0eaf0ada`
+
+Live frontend: https://frontend-five-omega-50.vercel.app
+
+The frontend’s default configuration points to that StudioNet address and supports read-only browsing, injected-wallet connection, a local browser wallet, live count reads, and payable report submission. Browser-wallet keys stay in local storage; export is not yet implemented, so this path is demonstrative rather than custody-grade.
+
+`DEPLOYMENT.json` binds the deployed source to commit `e9c5ad71d875eaf71136cb4ab08c31dfdc3662a7`. Verify the executable source fingerprint with `./scripts/verify-deployment-source.ps1`.
