@@ -1,5 +1,32 @@
 # ScopeLock submission readiness
 
+## Pavel review remediation
+
+Official review from Pavel Kolosov, Aug 14, 2026:
+
+> "Please add application write paths for adjudication and the supplementary-evidence and expiry flow so a submitted report can reach settlement or recover from a request for more evidence. Add direct tests for those report-state transitions and settlement outcomes."
+
+Implemented in the disclosure dossier using the existing injected-wallet architecture:
+
+- `SUBMITTED`: any connected account can call `adjudicate(report_id)`.
+- `NEEDS_EVIDENCE` before deadline: only the recorded researcher sees the public HTTPS supplementary-evidence form and can call `add_supplementary_evidence(report_id, url)`.
+- Successful supplementation refreshes the on-chain report to `SUBMITTED`, making adjudication available again.
+- `NEEDS_EVIDENCE` after deadline: any connected account can call `expire_needs_evidence(report_id)` and refresh the full-bond refund / `EXPIRED` state.
+- Terminal reports show settlement details and no additional lifecycle write.
+- Every write waits for `FINALIZED`, requires `FINISHED_WITH_RETURN`, and then refreshes `get_report`; finality without successful GenVM execution is shown as failure.
+
+Direct Mode result: **14 passed, 0 failed**. Coverage includes VALID/HIGH payout and refund, KNOWN_ISSUE, exact OUT_OF_SCOPE slash arithmetic, EXPLOITABILITY_NOT_ESTABLISHED, NEEDS_EVIDENCE with funds still locked, researcher-only supplementary evidence, recovery and re-adjudication, premature expiry rejection, post-deadline expiry/full refund by any caller, invalid duplicate-reference rejection, double-adjudication protection, and all four original basic invariants. A positive DUPLICATE settlement was not fabricated because the contract requires a real VecDB-selected settled-valid precedent; the direct suite verifies the settlement-critical invalid-reference guard.
+
+Application flow:
+
+```text
+create program -> submit bonded disclosure -> RUN ADJUDICATION
+  -> terminal verdict -> deterministic settlement
+  -> NEEDS_EVIDENCE -> researcher supplements public evidence
+       -> SUBMITTED -> RUN ADJUDICATION -> settlement
+  OR deadline passes -> anyone expires request -> full bond refund
+```
+
 ## Source and candidate proof
 
 The earlier OriginalityBond submission was rejected because tracked pytest helpers were detected as GenVM candidates. ScopeLock’s audit now finds exactly one candidate, `contracts/scopelock.py`; it passes lint and semantic validation. The direct-test compatibility shim contains no contract runtime import.

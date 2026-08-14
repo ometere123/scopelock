@@ -21,11 +21,23 @@ Deterministic code alone enforces program date windows, exact bonds, sponsor per
 - `/`: concise index and network proof
 - `/programs`, `/programs/new`, `/programs/[id]`: live program ledger, creation, and dossier
 - `/programs/[id]/submit`: exact bond read from contract and shared injected-wallet write
-- `/disclosures`, `/disclosures/[id]`: public ledger and Scope Rail dossier
+- `/disclosures`, `/disclosures/[id]`: public ledger and state-aware Scope Rail dossier with adjudication, researcher-only supplementary-evidence recovery, post-deadline expiry/refund, and finalized settlement state
 - `/precedent`: settled-valid possible precedents (semantic distance is not duplicate)
 - `/settlements`: final on-chain payout/refund/slash ledger
 
-The persistent application shell owns the sole production wallet identity. Browser-generated/local-storage wallets are absent. Every payable action uses the connected injected wallet, waits for finalization, and fails clearly when `NEXT_PUBLIC_SCOPELOCK_CONTRACT` is missing.
+The persistent application shell owns the sole production wallet identity. Browser-generated/local-storage wallets are absent. Production writes use the connected injected wallet, wait for finalization, verify `FINISHED_WITH_RETURN` GenVM execution, refresh chain state, and fail clearly when `NEXT_PUBLIC_SCOPELOCK_CONTRACT` is missing. A finalized transaction with failed GenVM execution is never presented as application success.
+
+### Application lifecycle
+
+```text
+create program -> submit bonded disclosure -> RUN ADJUDICATION
+  -> terminal verdict -> deterministic settlement
+  -> NEEDS_EVIDENCE -> researcher adds supplementary public HTTPS evidence
+       -> SUBMITTED -> RUN ADJUDICATION -> settlement
+  OR deadline passes -> any account expires request -> full bond refund
+```
+
+The dossier matches contract authorization exactly: any connected account may adjudicate; only the recorded researcher may supplement evidence before the deadline; and any connected account may expire a request after the deadline. Terminal reports expose no further lifecycle write.
 
 ## Contract API
 
@@ -52,6 +64,8 @@ cd frontend; npm run lint; npx tsc --noEmit; npm run build
 ```
 
 The candidate audit finds exactly one candidate: `contracts/scopelock.py`. The prior rejection came from tracked pytest helper imports being interpreted as contract candidates; the test compatibility shim now avoids runtime SDK imports, while the audit enforces the single-candidate invariant.
+
+The Direct Mode suite contains 14 tests and passes 14/14. It covers the four original invariants plus VALID/HIGH settlement, KNOWN_ISSUE, exact OUT_OF_SCOPE slashing, EXPLOITABILITY_NOT_ESTABLISHED, NEEDS_EVIDENCE without premature money movement, researcher-only supplementation, re-adjudication after supplementation, premature and post-deadline expiry, invalid duplicate-reference rejection, and terminal re-adjudication protection.
 
 ## On-chain proof
 
