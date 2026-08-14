@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ensureContract, waitFinalizedSuccessful } from "@/lib/genlayer";
 import { useWallet } from "@/components/wallet-provider";
 import type { Report } from "@/lib/scope-data";
@@ -12,12 +12,19 @@ export function ReportActions({item,onRefresh}:{item:Report;onRefresh:()=>Promis
  const [url,setUrl]=useState("");
  const [busy,setBusy]=useState(false);
  const [message,setMessage]=useState("");
- const [renderedAt]=useState(Date.now);
+ const [currentTime,setCurrentTime]=useState(Date.now);
  const status=Number(item.status), reportId=BigInt(String(item.id));
  const researcher=String(item.researcher||"");
  const isResearcher=Boolean(wallet.address)&&wallet.address!.toLowerCase()===researcher.toLowerCase();
  const deadline=useMemo(()=>Date.parse(String(item.evidence_deadline||"")),[item.evidence_deadline]);
- const expired=Number.isFinite(deadline)&&renderedAt>=deadline;
+ const expired=Number.isFinite(deadline)&&currentTime>=deadline;
+
+ useEffect(()=>{
+  if(status!==NEEDS_EVIDENCE||!Number.isFinite(deadline))return;
+  const remaining=deadline-Date.now();
+  const timer=window.setTimeout(()=>setCurrentTime(Date.now()),Math.max(0,remaining)+50);
+  return()=>window.clearTimeout(timer);
+ },[deadline,status]);
 
  async function write(functionName:string,args:unknown[]){
   setBusy(true);setMessage("Wallet signature requested…");
