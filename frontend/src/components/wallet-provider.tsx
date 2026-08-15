@@ -1,9 +1,102 @@
 "use client";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { studionet } from "genlayer-js/chains";
 import { injectedClient } from "@/lib/genlayer";
-type Wallet = { address?: `0x${string}`; status: "disconnected"|"connecting"|"connected"; connect(): Promise<void>; disconnect(): void; getWriteClient(): Promise<Awaited<ReturnType<typeof injectedClient>>>; refresh(): Promise<void> };
+
+type NetworkStatus = "unknown" | "ready" | "error";
+type Wallet = {
+ address?: `0x${string}`;
+ status: "disconnected" | "connecting" | "connected";
+ networkStatus: NetworkStatus;
+ error?: string;
+ connect(): Promise<void>;
+ disconnect(): void;
+ getWriteClient(): Promise<Awaited<ReturnType<typeof injectedClient>>>;
+ refresh(): Promise<void>;
+};
+
 const Context=createContext<Wallet|null>(null);
-export function WalletProvider({children}:{children:React.ReactNode}) { const [address,setAddress]=useState<`0x${string}`>(); const [status,setStatus]=useState<Wallet["status"]>("disconnected");
- const connect=useCallback(async()=>{setStatus("connecting");try{if(!window.ethereum)throw new Error("Install or unlock an injected EIP-1193 wallet for StudioNet.");const accounts=await window.ethereum.request({method:"eth_requestAccounts"}) as `0x${string}`[];if(!accounts?.[0])throw new Error("Wallet returned no account.");await injectedClient(accounts[0]);setAddress(accounts[0]);setStatus("connected");}catch(e){setStatus("disconnected");throw e;}},[]);
- const getWriteClient=useCallback(async()=>{if(!address)throw new Error("Connect the wallet shown in the header before signing.");return injectedClient(address)},[address]); const refresh=useCallback(async()=>{},[]); const value=useMemo(()=>({address,status,connect,disconnect:()=>{setAddress(undefined);setStatus("disconnected")},getWriteClient,refresh}),[address,status,connect,getWriteClient,refresh]);return <Context.Provider value={value}>{children}</Context.Provider> }
+const studioChainId=`0x${studionet.id.toString(16)}`.toLowerCase();
+const accountError="Wallet account connected, but StudioNet setup did not complete. Switch to GenLayer StudioNet in your wallet, then try again.";
+
+function firstAccount(value: unknown): `0x${string}` | undefined {
+ return Array.isArray(value) && typeof value[0]==="string" ? value[0] as `0x${string}` : undefined;
+}
+
+export function WalletProvider({children}:{children:React.ReactNode}) {
+ const [address,setAddress]=useState<`0x${string}`>();
+ const [status,setStatus]=useState<Wallet["status"]>("disconnected");
+ const [networkStatus,setNetworkStatus]=useState<NetworkStatus>("unknown");
+ const [error,setError]=useState<string>();
+
+ const clearSession=useCallback(()=>{setAddress(undefined);setStatus("disconnected");setNetworkStatus("unknown");setError(undefined)},[]);
+ const inspectNetwork=useCallback(async()=>{
+  if(!window.ethereum)return;
+  try{
+   const chainId=await window.ethereum.request({method:"eth_chainId"});
+   if(typeof chainId==="string"&&chainId.toLowerCase()===studioChainId){setNetworkStatus("ready");setError(undefined)}
+   else {setNetworkStatus("error");setError("Wallet account connected. Switch to GenLayer StudioNet to sign ScopeLock writes.")}
+  }catch{setNetworkStatus("error");setError("Wallet account connected, but ScopeLock could not confirm StudioNet. Switch to GenLayer StudioNet, then try again.")}
+ },[]);
+ const syncWallet=useCallback(async()=>{
+  if(!window.ethereum){clearSession();return}
+  try{
+   const account=firstAccount(await window.ethereum.request({method:"eth_accounts"}));
+   if(!account){clearSession();return}
+   setAddress(account);setStatus("connected");setError(undefined);
+   await inspectNetwork();
+  }catch(error){clearSession();setError(error instanceof Error?error.message:"Unable to read the injected wallet session.")}
+ },[clearSession,inspectNetwork]);
+ const prepareStudioNet=useCallback(async(account:`0x${string}`)=>{
+  try{const client=await injectedClient(account);setNetworkStatus("ready");setError(undefined);return client}
+  catch(error){setNetworkStatus("error");setError(accountError);throw error}
+ },[]);
+ const connect=useCallback(async()=>{
+  setStatus("connecting");setError(undefined);
+  try{
+   if(!window.ethereum)throw new Error("No injected wallet was found. Open ScopeLock inside your wallet browser or install and unlock a StudioNet-compatible wallet.");
+   const account=firstAccount(await window.ethereum.request({method:"eth_requestAccounts"}));
+   if(!account)throw new Error("Wallet returned no account. Unlock the wallet and approve the ScopeLock connection.");
+   setAddress(account);setStatus("connected");setNetworkStatus("unknown");
+   try{await prepareStudioNet(account)}catch{ /* rendered as a network error while address remains connected */ }
+  }catch(error){clearSession();setError(error instanceof Error?error.message:"Wallet connection failed.");throw error}
+ },[clearSession,prepareStudioNet]);
+ const getWriteClient=useCallback(async()=>{
+  if(!address)throw new Error("Connect the wallet shown in the header before signing.");
+  return prepareStudioNet(address);
+ },[address,prepareStudioNet]);
+ const refresh=useCallback(async()=>{await syncWallet()},[syncWallet]);
+
+ useEffect(()=>{
+  void syncWallet();
+  const provider=window.ethereum;
+  if(!provider)return;
+  const accountsChanged=(accounts:unknown)=>{
+   const account=firstAccount(accounts);
+   if(!account){clearSession();return}
+   setAddress(account);setStatus("connected");setError(undefined);void inspectNetwork();
+  };
+  const disconnected=()=>clearSession();
+  const chainChanged=()=>{void syncWallet()};
+  const onVisible=()=>{if(document.visibilityState==="visible")void syncWallet()};
+  const onReturn=()=>{void syncWallet()};
+  provider.on?.("accountsChanged",accountsChanged);
+  provider.on?.("disconnect",disconnected);
+  provider.on?.("chainChanged",chainChanged);
+  document.addEventListener("visibilitychange",onVisible);
+  window.addEventListener("focus",onReturn);
+  window.addEventListener("pageshow",onReturn);
+  return()=>{
+   provider.removeListener?.("accountsChanged",accountsChanged);
+   provider.removeListener?.("disconnect",disconnected);
+   provider.removeListener?.("chainChanged",chainChanged);
+   document.removeEventListener("visibilitychange",onVisible);
+   window.removeEventListener("focus",onReturn);
+   window.removeEventListener("pageshow",onReturn);
+  };
+ },[clearSession,inspectNetwork,syncWallet]);
+
+ const value=useMemo(()=>({address,status,networkStatus,error,connect,disconnect:clearSession,getWriteClient,refresh}),[address,status,networkStatus,error,connect,clearSession,getWriteClient,refresh]);
+ return <Context.Provider value={value}>{children}</Context.Provider>;
+}
 export function useWallet(){const value=useContext(Context);if(!value)throw new Error("WalletProvider missing");return value}
